@@ -1,9 +1,14 @@
 import java.io.*;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.net.URLStreamHandlerFactory;
 
-public class FileClassLoader extends ClassLoader {
+public class HotDeployClassLoder extends ClassLoader {
+
+
     private String rootDir;
 
-    public FileClassLoader(String rootDir) {
+    public HotDeployClassLoder(String rootDir) {
         this.rootDir = rootDir;
     }
 
@@ -62,29 +67,35 @@ public class FileClassLoader extends ClassLoader {
 
     public static void main(String[] args) throws ClassNotFoundException {
         String rootDir="D:\\JAVA\\SpringBoot\\基本项目\\Learn_classloader\\out\\production\\Learn_classloader\\";
-
-        FileClassLoader loader1 = new FileClassLoader(rootDir);
-        FileClassLoader loader2 = new FileClassLoader(rootDir);
-
-        Class<?> object1=loader1.findClass("DemoObj");
-        Class<?> object2=loader2.findClass("DemoObj");
-
-        System.out.println("findClass->obj1:"+object1.hashCode());
-        System.out.println("findClass->obj2:"+object2.hashCode());
-
         //创建自定义文件类加载器
-        FileClassLoader loader = new FileClassLoader(rootDir);
+        HotDeployClassLoder loader = new HotDeployClassLoder(rootDir);
+        HotDeployClassLoder loader2 = new HotDeployClassLoder(rootDir);
 
         try {
-            //加载指定的class文件
-//            Class<?> object1=loader.findClass("DemoObj");
-//            System.out.println(object1.newInstance().toString());
+            //加载指定的class文件,调用loadClass()
+            Class<?> object1=loader.loadClass("DemoObj");
+            Class<?> object2=loader2.loadClass("DemoObj");
 
-            //输出结果:I am DemoObj
+            System.out.println("loadClass->obj1:"+object1.hashCode());
+            System.out.println("loadClass->obj2:"+object2.hashCode());
+
+            //加载指定的class文件,直接调用findClass(),绕过检测机制，创建不同class对象。
+            Class<?> object3=loader.findClass("DemoObj");
+            Class<?> object4=loader2.findClass("DemoObj");
+
+            System.out.println("loadClass->obj3:"+object3.hashCode());
+            System.out.println("loadClass->obj4:"+object4.hashCode());
+
+            /**
+             * 输出结果:
+             * loadClass->obj1:644117698
+             loadClass->obj2:644117698
+             findClass->obj3:723074861
+             findClass->obj4:895328852
+             */
+
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
-
-
 }
